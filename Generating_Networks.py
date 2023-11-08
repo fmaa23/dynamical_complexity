@@ -109,7 +109,7 @@ class Community():
             raise ValueError('Scheme invalid. Should be "constant" or "random"')
 
         scaled_weight = weight * scaling_factor
-        weights = np.zeros((module1._N,module._N))
+        weights = np.zeros((module1._N,module2._N))
         weights[connected_neurons] = weights[connected_neurons] + scaled_weight
         for connection in self.connections:
             if connection.module1 == module1 and connection.module1 == module1:
