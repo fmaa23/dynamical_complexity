@@ -240,6 +240,7 @@ class Community():
         exc_modules = []
 
         self.rewired_W = np.zeros((800, 800))
+        self.rewired_D = np.zeros((800, 800))
         for module in self.modules:
             if module.type_of_network == "exc":
                 exc_modules.append(module)
@@ -248,13 +249,18 @@ class Community():
             for i in range(0, 100):
                 for j in range(0, 100):
                     if module._W[i][j] > 0:
-                        rewire_p = random.random()
-                        if rewire_p <= p:
+                        self.try_rewiring(p, random, module, origin_module, i, j)
+
+    def try_rewiring(self, p, random, module, origin_module, i, j):
+        """ Contains the logic behind rewiring"""
+        rewire_p = random.random()
+        if rewire_p <= p:
                             # Rewire accordingly
-                            self.rewire(random, module, origin_module, i, j)
-                        else:
+            self.rewire(random, module, origin_module, i, j)
+        else:
                             # Add the connection to the rewired representation 
-                            self.rewired_W[origin_module*100 + i][origin_module*100 + j] = 17
+            self.rewired_W[origin_module*100 + i][origin_module*100 + j] = 17
+            self.rewired_D[origin_module*100 + i][origin_module*100 + j] = module._D[i][j]
 
 
     def rewire(self, random, module, origin_module, i, j):
@@ -268,7 +274,9 @@ class Community():
                                 # Reconnect the neuron
             if self.rewired_W[origin_module*100 + i][random_module*100 + random_neuron] == 0:
                 self.rewired_W[origin_module*100 + i][random_module*100 + random_neuron] = 17
+                self.rewired_D[origin_module*100 + i][random_module*100 + random_neuron] = module._D[i][j]
                 module._W[i][j] = 0
+                module._D[i][j] = 0
                 rewired = True
 
             
