@@ -259,7 +259,7 @@ class Community():
             self.rewire(random, module, origin_module, i, j)
         else:
                             # Add the connection to the rewired representation 
-            self.rewired_W[origin_module*100 + i][origin_module*100 + j] = 17
+            self.rewired_W[origin_module*100 + i][origin_module*100 + j] = module._W[i][j]
             self.rewired_D[origin_module*100 + i][origin_module*100 + j] = module._D[i][j]
 
 
@@ -273,7 +273,7 @@ class Community():
             random_neuron = random.randint(0, 99)
                                 # Reconnect the neuron
             if self.rewired_W[origin_module*100 + i][random_module*100 + random_neuron] == 0:
-                self.rewired_W[origin_module*100 + i][random_module*100 + random_neuron] = 17
+                self.rewired_W[origin_module*100 + i][random_module*100 + random_neuron] = module._W[i][j]
                 self.rewired_D[origin_module*100 + i][random_module*100 + random_neuron] = module._D[i][j]
                 module._W[i][j] = 0
                 module._D[i][j] = 0
