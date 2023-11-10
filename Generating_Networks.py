@@ -125,6 +125,7 @@ class Community():
         self.modules = modules
         self.connections = connections
 
+
     def set_connection(self,module1, module2, weight_scheme, weight_range, scaling_factor, num_connections_from, delay):
         """Sets a connection between two modules.
            Args:
@@ -186,6 +187,7 @@ class Community():
         # Appending the connection to the community connections between modules
         self.connections.append(connection)
 
+
     def set_connection_btw_modules(self, projection_pattern, weight_scheme, weight_range, scaling_factor, delay):
         """Sets the connection between modules as specified by the project specs.
            projection_pattern (str): "Focal" from specific number of neurons in module 1 to all neurons in module 2
@@ -231,6 +233,45 @@ class Community():
                 self.set_connection(module_inhib, module, weight_scheme, weight_range, scaling_factor, num_connections_from, delay)
         else:
             raise ValueError('Projection scheme invalid. Should be "Focal" or "Diffuse"')
+    
+
+    def make_modular_small_world(self, p=0.4):
+        import random
+        exc_modules = []
+
+        self.rewired_W = np.zeros((800, 800))
+        for module in self.modules:
+            if module.type_of_network == "exc":
+                exc_modules.append(module)
+        
+        for origin_module, module in enumerate(exc_modules):
+            for i in range(0, 100):
+                for j in range(0, 100):
+                    if module._W[i][j] > 0:
+                        rewire_p = random.random()
+                        if rewire_p <= p:
+                            # Rewire accordingly
+                            self.rewire(random, module, origin_module, i, j)
+                        else:
+                            # Add the connection to the rewired representation 
+                            self.rewired_W[origin_module*100 + i][origin_module*100 + j] = 17
+
+
+    def rewire(self, random, module, origin_module, i, j):
+        "Method used in make_modular_small_world"
+        rewired = False
+        while not rewired:
+            random_module = random.randint(0, 6)
+            if random_module >= origin_module:
+                random_module += 1
+            random_neuron = random.randint(0, 99)
+                                # Reconnect the neuron
+            if self.rewired_W[origin_module*100 + i][random_module*100 + random_neuron] == 0:
+                self.rewired_W[origin_module*100 + i][random_module*100 + random_neuron] = 17
+                module._W[i][j] = 0
+                rewired = True
+
+            
 
 
 if __name__ == "__main__":
