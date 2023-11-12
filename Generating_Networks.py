@@ -13,23 +13,26 @@ class Modules(IzNetwork):
         super().__init__(N, Dmax)
         self.type_of_network = type_of_network
         self.connections_with_in = connections_with_in
+        self._N
+        self.set_network_pars()
 
-    def get_network_pars(self):
-        if self.type == "exc":
+    def set_network_pars(self):
+        if self.type_of_network == "exc":
             a, b, c, d = 0.02, 0.2, -65, 8
-        elif self.type == "inhib":
+        elif self.type_of_network == "inhib":
             a, b, c, d = 0.02, 0.2, -50, 2
         else:
             raise ValueError('Network type invalid. Should be "inhib" or "exc"')
 
         a_n, b_n, c_n, d_n =[], [], [], []
 
-        for i in range(self.num):
+        for i in range(self._N):
             a_n.append(a)
             b_n.append(b)
             c_n.append(c)
             d_n.append(d)
 
+        self.a, self.b, self.c, self.d = a_n, b_n, c_n, d_n
         self.setParameters(a_n, b_n, c_n, d_n)
 
     def setCurrentWithBackgroundFiring(self):
@@ -120,11 +123,16 @@ class Community():
        Connections within modules are specified in the module (Module class)attributes via the weights array module._W
        and delays array module._D
     """
-    def __init__(self, modules=[], connections=[]):
+    def __init__(self, modules=None, connections=None):
         # List of modules present in the community
-        self.modules = modules
-        self.connections = connections
-
+        if modules is None:
+            self.modules = []  # Create a new list for each instance
+        else:
+            self.modules = modules
+        if connections is None:
+            self.connections = []  # Create a new list for each instance
+        else:
+            self.connections = connections
 
     def set_connection(self,module1, module2, weight_scheme, weight_range, scaling_factor, num_connections_from, delay):
         """Sets a connection between two modules.
@@ -187,7 +195,6 @@ class Community():
         # Appending the connection to the community connections between modules
         self.connections.append(connection)
 
-
     def set_connection_btw_modules(self, projection_pattern, weight_scheme, weight_range, scaling_factor, delay):
         """Sets the connection between modules as specified by the project specs.
            projection_pattern (str): "Focal" from specific number of neurons in module 1 to all neurons in module 2
@@ -232,8 +239,7 @@ class Community():
                 # Setting the connection
                 self.set_connection(module_inhib, module, weight_scheme, weight_range, scaling_factor, num_connections_from, delay)
         else:
-            raise ValueError('Projection scheme invalid. Should be "Focal" or "Diffuse"')
-    
+            raise ValueError('Projection scheme invalid. Should be "Focal" or "Diffuse"')  
 
     def make_modular_small_world(self, p=0.4):
         import random
@@ -244,7 +250,6 @@ class Community():
         for module in self.modules:
             if module.type_of_network == "exc":
                 exc_modules.append(module)
-        
         for origin_module, module in enumerate(exc_modules):
             for i in range(0, 100):
                 for j in range(0, 100):
@@ -255,13 +260,12 @@ class Community():
         """ Contains the logic behind rewiring"""
         rewire_p = random.random()
         if rewire_p <= p:
-                            # Rewire accordingly
+            # Rewire accordingly
             self.rewire(random, module, origin_module, i, j)
         else:
-                            # Add the connection to the rewired representation 
+            # Add the connection to the rewired representation 
             self.rewired_W[origin_module*100 + i][origin_module*100 + j] = module._W[i][j]
             self.rewired_D[origin_module*100 + i][origin_module*100 + j] = module._D[i][j]
-
 
     def rewire(self, random, module, origin_module, i, j):
         "Method used in make_modular_small_world"
@@ -271,7 +275,7 @@ class Community():
             if random_module >= origin_module:
                 random_module += 1
             random_neuron = random.randint(0, 99)
-                                # Reconnect the neuron
+            # Rewire the neuron
             if self.rewired_W[origin_module*100 + i][random_module*100 + random_neuron] == 0:
                 self.rewired_W[origin_module*100 + i][random_module*100 + random_neuron] = module._W[i][j]
                 self.rewired_D[origin_module*100 + i][random_module*100 + random_neuron] = module._D[i][j]
@@ -279,8 +283,52 @@ class Community():
                 module._D[i][j] = 0
                 rewired = True
 
-            
+    def generate_final_network(self):
+        self.final_network = IzNetwork(1000, 20)
 
+        # set weights adn delays in the final network
+        #Initialize weights and delays:
+        final_weights = np.zeros((1000, 1000), dtype=int)
+        final_delays = np.zeros((1000, 1000), dtype=int)
+        # add rewired to final:
+        final_weights[0:800, 0:800] = self.rewired_W
+        final_delays[0:800, 0:800] = self.rewired_W
+
+        # add excitatory and inhibitory
+        i = 0
+        j = 0
+        for connection in self.connections:
+            if(connection.module1.type_of_network == "exc"):
+                final_weights[i*100:(i+1)*100, 800:1000] = connection.weights
+                final_delays[i*100:(i+1)*100, 800:1000] = connection.delays
+                i += 1
+            else:
+                final_weights[800:1000, j*100:(j+1)*100] = connection.weights
+                final_delays[800:1000, j*100:(j+1)*100] = connection.delays
+                j += 1
+        self.final_network.setWeights(final_weights)
+        self.final_network.setDelays(final_delays)
+
+        #Initialize parameters:
+        final_a = np.zeros(1000)
+        final_b = np.zeros(1000)
+        final_c = np.zeros(1000)
+        final_d = np.zeros(1000)
+        # add parameters
+        i = 0
+        for module in self.modules:
+            if(module.type_of_network == "exc"):
+                final_a[i*100:(i+1)*100] = module.a
+                final_b[i*100:(i+1)*100] = module.b
+                final_c[i*100:(i+1)*100] = module.c
+                final_d[i*100:(i+1)*100] = module.d
+                i += 1
+            else:
+                final_a[800:1000] = module.a
+                final_b[800:1000] = module.b
+                final_c[800:1000] = module.c
+                final_d[800:1000] = module.d
+        self.final_network.setParameters(a=final_a, b=final_b, c=final_c, d=final_d)
 
 if __name__ == "__main__":
     # Excitatory neurons network
