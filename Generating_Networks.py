@@ -19,10 +19,11 @@ class Modules(IzNetwork):
         self.set_network_pars()
 
     def set_network_pars(self):
+        r = random.uniform(0, 1)
         if self.type_of_network == "exc":
-            a, b, c, d = 0.02, 0.2, -65, 8
+            a, b, c, d = 0.02, 0.2, (-65 + 15 * r**2), (8 - 6 * r**2)
         elif self.type_of_network == "inhib":
-            a, b, c, d = 0.02, 0.2, -50, 2
+            a, b, c, d = (0.02 + 0.08 * r), (0.25 - 0.05 * r), -50, 2
         else:
             raise ValueError('Network type invalid. Should be "inhib" or "exc"')
 
@@ -73,8 +74,17 @@ class Modules(IzNetwork):
 
         # Random connections
         num_connections_with_in = self.connections_with_in
-        indices = np.random.choice(connection_size[0] * connection_size[1], num_connections_with_in, replace=False)
-        connected_neurons.flat[indices] = True
+        indices = set()
+
+        while len(indices) < num_connections_with_in:
+            new_index = (random.randint(0, connection_size[0]-1), random.randint(0, connection_size[1]-1))
+            if new_index[0] != new_index[1]:
+                indices.add(new_index)
+
+        indices = list(indices)
+
+        for index in indices:
+            connected_neurons[index[0]][index[1]] = True
 
         # Updating weights based on the specified weighting scheme
         if weight_scheme == "constant":
@@ -137,7 +147,8 @@ class Community():
             self.connections = connections
         # final_network = None
 
-    def set_connection(self,module1, module2, weight_scheme, weight_range, scaling_factor, num_connections_from, delay):
+    def set_connection(self,module1, module2, weight_scheme, weight_range, scaling_factor, num_connections_from, delay,
+                       connections_to_all = True, start_connections_idx = None, end_connections_idx= None):
         """Sets a connection between two modules.
            Args:
                module1 (Module):     The module the connections starts from
@@ -149,6 +160,9 @@ class Community():
                scaling_factor (int): The scaling factor of the connections between neurons
                num_connections_from (int): The number of neurons participating in the connection from module 1
                delay (int): The maximum delay of the connection in milliseconds
+               connections_to_all (bool): Connections to be to all neurons in the second module
+               start_connections_idx (int): If connections_random is False, specify start connection index
+               end_connections_idx (int): If connections_random is False, specify end connection index
 
         """
 
@@ -160,14 +174,20 @@ class Community():
         indices = np.random.choice(connection_size[0], num_connections_from, replace=False)
 
         # Connecting from selected neuron indices to all neurons in the second module
-        connected_neurons[indices,:] = True
+        if connections_to_all:
+            connected_neurons[indices,:] = True
+        else:
+            connected_neurons[indices, start_connections_idx:end_connections_idx] = True
 
         # Getting weights based on the specified weighting scheme
         if weight_scheme == "constant":
             weight = weight_range[0]
         elif weight_scheme == "random":
             # Size is number of neurons the connection is from to number of neurons the connection is directed to
-            weight = np.random.uniform(weight_range[0], weight_range[1], size=num_connections_from*module2._N)
+            if connections_to_all:
+                weight = np.random.uniform(weight_range[0], weight_range[1], size=num_connections_from * module2._N)
+            else:
+                weight = np.random.uniform(weight_range[0], weight_range[1], size=num_connections_from * (end_connections_idx-start_connections_idx))
         else:
             raise ValueError('Scheme invalid. Should be "constant" or "random"')
 
@@ -189,7 +209,10 @@ class Community():
         delays = delays.astype(int)
 
         # Updating delays of connected neurons
-        random_integers = np.random.randint(1, delay+1, size=num_connections_from*module2._N)
+        if connections_to_all:
+            random_integers = np.random.randint(1, delay+1, size=num_connections_from*module2._N)
+        else:
+            random_integers = np.random.randint(1, delay + 1, size= num_connections_from * (end_connections_idx-start_connections_idx))
         delays[connected_neurons] += random_integers
 
         # Specifying the connection delays
@@ -224,13 +247,16 @@ class Community():
         # Focal connection between one random excitatory module and the inhibitory module
         if projection_pattern == "Focal":
 
-            # Choosing the excitatory model randomly
-            selected_ex_module = random.choice(modules_ex)
-            # The number of neurons that are in connection from the excitatory module
-            num_connections_from = 4
+            for i, module_ex in enumerate(modules_ex):
+                num_connections_from = 4
+
+                start_edges_ind = i*25
+                end_edges_ind = (i+1) * 25
+                self.set_connection(module_ex, module_inhib, weight_scheme, weight_range, scaling_factor,
+                                    num_connections_from, delay, connections_to_all=False,
+                                    start_connections_idx=start_edges_ind, end_connections_idx=end_edges_ind)
 
             # Setting the connection
-            self.set_connection(selected_ex_module, module_inhib, weight_scheme, weight_range, scaling_factor, num_connections_from, delay)
 
         # Diffuse connection between the inhibitory module and all neurons in all excitatory modules
         elif projection_pattern == "Diffuse":
@@ -295,7 +321,7 @@ class Community():
         final_delays = np.zeros((1000, 1000), dtype=int)
         # add rewired to final:
         final_weights[0:800, 0:800] = self.rewired_W
-        final_delays[0:800, 0:800] = self.rewired_W
+        final_delays[0:800, 0:800] = self.rewired_D
 
         # add excitatory and inhibitory
         i = 0
@@ -337,7 +363,7 @@ if __name__ == "__main__":
     # Excitatory neurons network
     Module_ex = Modules(100, 20, "exc", connections_with_in=1000)
     # Inhibitory neurons network
-    Modules_inhib = Modules(200, 1, "inhib", connections_with_in=40000)
+    Modules_inhib = Modules(200, 1, "inhib", connections_with_in=39800)
 
     # Connections within the excitatory network
     Module_ex.set_Connections_within("constant", (1,), 17)
@@ -362,7 +388,7 @@ if __name__ == "__main__":
     community.set_connection_btw_modules("Diffuse", "random", (-1, 0), 2, 1)
 
     # breakpoint()
-    community.make_modular_small_world(0.7)
+    community.make_modular_small_world(0.875)
     community.generate_final_network()
     
     T = 1000
@@ -373,9 +399,14 @@ if __name__ == "__main__":
         community.final_network.update()
         V[t,:], _ = community.final_network.getState()
 
-    # show the raster plot
-    t, n = np.where(V > 29)
-    plt.scatter(t, n)
+    neurons_to_plot = 800
+    neurons = np.arange(neurons_to_plot)
+    firing_times = V[:, :neurons_to_plot]
+
+    firing_instances, fired_neurons = np.where(firing_times > 29)
+
+    time = [i for i in range(1000)]
+    plt.scatter(firing_instances, fired_neurons)
     plt.xlabel('Time (ms)')
     plt.ylabel('Neuron index')
     plt.show()
