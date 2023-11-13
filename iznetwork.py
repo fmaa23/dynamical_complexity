@@ -111,6 +111,20 @@ class IzNetwork(object):
       raise Exception('Current vector must be of size N.')
     self._I = I
 
+  def setCurrentWithBackgroundFiring(self):
+      """
+      Set the current input to the network with background firing.
+      Ensure that the process occurs every 1 ms.
+      """
+      # Generate Poisson-distributed random numbers with λ = 0.01 for each neuron
+      poisson_values = np.random.poisson(0.01, self._N)
+
+      # Check if the Poisson values are greater than 0 and inject extra current (I = 15)
+      for neuron_index, poisson_value in enumerate(poisson_values):
+          if poisson_value > 0:
+              self._I[neuron_index] = 15  # Inject extra current for spontaneous firing
+          else:
+              self._I[neuron_index] = 0  # No extra current
 
   def setParameters(self, a, b, c, d):
     """

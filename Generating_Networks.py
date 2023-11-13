@@ -2,6 +2,8 @@ import random
 import numpy as np
 from iznetwork import*
 
+import matplotlib.pyplot as plt
+
 
 # Generating Modules
 class Modules(IzNetwork):
@@ -36,19 +38,19 @@ class Modules(IzNetwork):
         self.setParameters(a_n, b_n, c_n, d_n)
 
     def setCurrentWithBackgroundFiring(self):
-        """
-        Set the current input to the network with background firing.
-        Ensure that the process occurs every 1 ms.
-        """
-        # Generate Poisson-distributed random numbers with λ = 0.01 for each neuron
-        poisson_values = np.random.poisson(0.01, self._N)
+      """
+      Set the current input to the network with background firing.
+      Ensure that the process occurs every 1 ms.
+      """
+      # Generate Poisson-distributed random numbers with λ = 0.01 for each neuron
+      poisson_values = np.random.poisson(0.01, self._N)
 
-        # Check if the Poisson values are greater than 0 and inject extra current (I = 15)
-        for neuron_index, poisson_value in enumerate(poisson_values):
-            if poisson_value > 0:
-                self._I[neuron_index] = 15  # Inject extra current for spontaneous firing
-            else:
-                self._I[neuron_index] = 0  # No extra current
+      # Check if the Poisson values are greater than 0 and inject extra current (I = 15)
+      for neuron_index, poisson_value in enumerate(poisson_values):
+          if poisson_value > 0:
+              self._I[neuron_index] = 15  # Inject extra current for spontaneous firing
+          else:
+              self._I[neuron_index] = 0  # No extra current
 
     def set_Connections_within(self, weight_scheme, weight_range, scaling_factor):
         """" Setting connections within a single module. The weights and delays are updated within the module parameters
@@ -133,6 +135,7 @@ class Community():
             self.connections = []  # Create a new list for each instance
         else:
             self.connections = connections
+        # final_network = None
 
     def set_connection(self,module1, module2, weight_scheme, weight_range, scaling_factor, num_connections_from, delay):
         """Sets a connection between two modules.
@@ -358,7 +361,23 @@ if __name__ == "__main__":
     # Setting inhibitory-excitatory connections
     community.set_connection_btw_modules("Diffuse", "random", (-1, 0), 2, 1)
 
-    breakpoint()
+    # breakpoint()
+    community.make_modular_small_world(0.7)
+    community.generate_final_network()
+    
+    T = 1000
+    V = np.zeros((T, community.final_network._N))
+    
+    for t in range(T):
+        community.final_network.setCurrentWithBackgroundFiring()
+        community.final_network.update()
+        V[t,:], _ = community.final_network.getState()
 
+    # show the raster plot
+    t, n = np.where(V > 29)
+    plt.scatter(t, n)
+    plt.xlabel('Time (ms)')
+    plt.ylabel('Neuron index')
+    plt.show()
 
 
