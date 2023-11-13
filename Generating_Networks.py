@@ -19,17 +19,17 @@ class Modules(IzNetwork):
         self.set_network_pars()
 
     def set_network_pars(self):
-        r = random.uniform(0, 1)
-        if self.type_of_network == "exc":
-            a, b, c, d = 0.02, 0.2, (-65 + 15 * r**2), (8 - 6 * r**2)
-        elif self.type_of_network == "inhib":
-            a, b, c, d = (0.02 + 0.08 * r), (0.25 - 0.05 * r), -50, 2
-        else:
-            raise ValueError('Network type invalid. Should be "inhib" or "exc"')
 
         a_n, b_n, c_n, d_n =[], [], [], []
 
         for i in range(self._N):
+            r = random.uniform(0, 1)
+            if self.type_of_network == "exc":
+                a, b, c, d = 0.02, 0.2, (-65 + 15 * r ** 2), (8 - 6 * r ** 2)
+            elif self.type_of_network == "inhib":
+                a, b, c, d = (0.02 + 0.08 * r), (0.25 - 0.05 * r), -50, 2
+            else:
+                raise ValueError('Network type invalid. Should be "inhib" or "exc"')
             a_n.append(a)
             b_n.append(b)
             c_n.append(c)
@@ -388,7 +388,7 @@ if __name__ == "__main__":
     community.set_connection_btw_modules("Diffuse", "random", (-1, 0), 2, 1)
 
     # breakpoint()
-    community.make_modular_small_world(0.875)
+    community.make_modular_small_world(0.1)
     community.generate_final_network()
     
     T = 1000
@@ -405,7 +405,8 @@ if __name__ == "__main__":
 
     firing_instances, fired_neurons = np.where(firing_times > 29)
 
-    time = [i for i in range(1000)]
+
+
     plt.scatter(firing_instances, fired_neurons)
     plt.xlabel('Time (ms)')
     plt.ylabel('Neuron index')
