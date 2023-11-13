@@ -317,13 +317,13 @@ class Community():
 
         # set weights adn delays in the final network
         #Initialize weights and delays:
-        final_weights = np.zeros((1000, 1000), dtype=int)
+        final_weights = np.zeros((1000, 1000))
         final_delays = np.zeros((1000, 1000), dtype=int)
         # add rewired to final:
         final_weights[0:800, 0:800] = self.rewired_W
         final_delays[0:800, 0:800] = self.rewired_D
 
-        # add excitatory and inhibitory
+        # add excitatory to inhibitory and inhibitory to exhitatory
         i = 0
         j = 0
         for connection in self.connections:
@@ -335,9 +335,19 @@ class Community():
                 final_weights[800:1000, j*100:(j+1)*100] = connection.weights
                 final_delays[800:1000, j*100:(j+1)*100] = connection.delays
                 j += 1
+        
+        # add inhibitory to inhibitory
+        for module in self.modules:
+            if module.type_of_network == "inhib":
+                #print(np.copy(module._W).shape)
+                #print(final_weights[800:1000, 800:1000].shape)
+                final_weights[800:1000, 800:1000] = np.copy(module._W)
+                print(final_weights[800:1000, 800:1000])
+                final_delays[800:1000, 800:1000] = module._D
         self.final_network.setWeights(final_weights)
         self.final_network.setDelays(final_delays)
 
+        self.final_weights = final_weights
         #Initialize parameters:
         final_a = np.zeros(1000)
         final_b = np.zeros(1000)
@@ -358,6 +368,25 @@ class Community():
                 final_c[800:1000] = module.c
                 final_d[800:1000] = module.d
         self.final_network.setParameters(a=final_a, b=final_b, c=final_c, d=final_d)
+    
+    def plot_Weights1(self):
+        import matplotlib.pyplot as plt
+
+        # Create a mask: 0 where weights are 0, 1 where weights are non-zero
+        mask = np.where(self.final_weights == 0, 0, 1)
+        # Create the plot
+        plt.imshow(mask, cmap='coolwarm', interpolation='nearest')
+
+        # Optional: Add a color bar
+        plt.colorbar()
+
+        # Optional: Add title and labels
+        plt.title('Heatmap of Weights')
+        plt.xlabel('X-axis Label')
+        plt.ylabel('Y-axis Label')
+
+        # Show the plot
+        plt.show()
 
 if __name__ == "__main__":
     # Excitatory neurons network

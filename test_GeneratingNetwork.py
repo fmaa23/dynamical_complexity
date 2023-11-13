@@ -10,7 +10,7 @@ class TestGeneratingNetwork(unittest.TestCase):
         # Excitatory neurons network
         Module_ex = Modules(100, 20, "exc", connections_with_in=1000)
         # Inhibitory neurons network
-        Modules_inhib = Modules(200, 1, "inhib", connections_with_in=40000)
+        Modules_inhib = Modules(200, 1, "inhib", connections_with_in=39800)
 
         # Connections within the excitatory network
         Module_ex.set_Connections_within("constant", (1,), 17)
@@ -45,3 +45,12 @@ class TestGeneratingNetwork(unittest.TestCase):
         assert count == 8000
 
         self.community.generate_final_network()
+
+    def test_plot_weights(self):
+        self.community.make_modular_small_world(0.2)
+        count = np.sum(self.community.rewired_W > 0)
+        assert count == 8000
+
+        self.community.generate_final_network()
+
+        self.community.plot_Weights1()
