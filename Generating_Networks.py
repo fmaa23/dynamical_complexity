@@ -417,7 +417,7 @@ if __name__ == "__main__":
     community.set_connection_btw_modules("Diffuse", "random", (-1, 0), 2, 1)
 
     # breakpoint()
-    community.make_modular_small_world(0.1)
+    community.make_modular_small_world(0)
     community.generate_final_network()
     
     T = 1000
@@ -434,11 +434,55 @@ if __name__ == "__main__":
 
     firing_instances, fired_neurons = np.where(firing_times > 29)
 
-
-
     plt.scatter(firing_instances, fired_neurons)
     plt.xlabel('Time (ms)')
     plt.ylabel('Neuron index')
     plt.show()
+
+    window_size=50
+    shift = 20
+    spikes = np.zeros((50,800))
+    num_windows = T//window_size
+
+    for j in range(800):
+        tuple_array = np.array(list(zip(firing_instances, fired_neurons)))
+        time_indices = np.where(fired_neurons==j)
+        timings=[]
+        padding = window_size - shift
+
+            # Adjust the range to include padding at the start
+        for i, t in enumerate(range(-padding, T - window_size + 1, shift)):
+            start_time = max(0, t)  # Ensure the start time doesn't go below 0
+            end_time = min(t + window_size, T)  # Ensure the end time doesn't exceed T
+            timings.append((start_time, end_time))
+
+        times_of_this_neuron_firing = firing_instances[np.where(fired_neurons == j)]
+        for k,times in enumerate(timings):
+            for time_of_this_neuron_firing in times_of_this_neuron_firing:
+                if time_of_this_neuron_firing in range(times[0],times[1]+1):
+                    spikes[k,j] = spikes[k,j]+1
+
+    firing=[]
+    for i in range(8):
+        firing.append(np.sum(spikes[:, i*100: (i+1)*100], axis=1)/100)
+
+    time_points = np.linspace(0, 1000, len(firing[0]))
+    for i, arr in enumerate(firing):
+        plt.plot(time_points, arr)
+
+    plt.xlabel('Time (ms)')
+    plt.ylabel('Firing Rate')
+    plt.title('Firing Rate over 1000ms (50 Windows)')
+    plt.show()
+
+
+
+
+
+
+
+    breakpoint()
+
+
 
 
