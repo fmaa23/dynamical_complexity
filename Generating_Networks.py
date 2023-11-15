@@ -370,7 +370,7 @@ class Community():
         self.final_network.setParameters(a=final_a, b=final_b, c=final_c, d=final_d)
     
     def plot_Weights1(self):
-        import matplotlib.pyplot as plt
+        
 
         # Create a mask: 0 where weights are 0, 1 where weights are non-zero
         mask = np.where(self.final_weights == 0, 0, 1)
@@ -382,47 +382,18 @@ class Community():
 
         # Optional: Add title and labels
         plt.title('Heatmap of Weights')
-        plt.xlabel('X-axis Label')
-        plt.ylabel('Y-axis Label')
+        plt.xlabel('Neuron Index')
+        plt.ylabel('Neuron Index')
 
         # Show the plot
         plt.show()
-
-if __name__ == "__main__":
-    # Excitatory neurons network
-    Module_ex = Modules(100, 20, "exc", connections_with_in=1000)
-    # Inhibitory neurons network
-    Modules_inhib = Modules(200, 1, "inhib", connections_with_in=39800)
-
-    # Connections within the excitatory network
-    Module_ex.set_Connections_within("constant", (1,), 17)
-    # Connections within the inhibitory network
-    Modules_inhib.set_Connections_within("random", (-1, 0), 1)
-
-    # Initializing a community
-    community = Community()
-
-    # Adding eight excitatory networks to the community
-    for i in range(8):
-        Module_ex = Modules(100, 20, "exc", connections_with_in=1000)
-        Module_ex.set_Connections_within("constant", (1,), 17)
-        community.modules.append(Module_ex)
-
-    # Adding one inhibitory networks to the community
-    community.modules.append(Modules_inhib)
-
-    # Setting excitatory-inhibitory connections
-    community.set_connection_btw_modules("Focal", "random", (0, 1), 50, 1)
-    # Setting inhibitory-excitatory connections
-    community.set_connection_btw_modules("Diffuse", "random", (-1, 0), 2, 1)
-
-    # breakpoint()
-    community.make_modular_small_world(0)
-    community.generate_final_network()
     
-    T = 1000
+def simulating(Community, p, T=1000):
+    Community.make_modular_small_world(p)
+    Community.generate_final_network()
+    Community.plot_Weights1()
+    
     V = np.zeros((T, community.final_network._N))
-    
     for t in range(T):
         community.final_network.setCurrentWithBackgroundFiring()
         community.final_network.update()
@@ -434,10 +405,14 @@ if __name__ == "__main__":
 
     firing_instances, fired_neurons = np.where(firing_times > 29)
 
+    plt.figure(figsize=(10,8))
+    plt.subplots_adjust(hspace=0.3, wspace=0.4)
+
+    plt.subplot(2,1,1)
     plt.scatter(firing_instances, fired_neurons)
     plt.xlabel('Time (ms)')
     plt.ylabel('Neuron index')
-    plt.show()
+    plt.title('Firing Neurons when p={}'.format(p))
 
     window_size=50
     shift = 20
@@ -468,19 +443,47 @@ if __name__ == "__main__":
 
     time_points = np.linspace(0, 1000, len(firing[0]))
     for i, arr in enumerate(firing):
+        plt.subplot(2,1,2)
         plt.plot(time_points, arr)
 
     plt.xlabel('Time (ms)')
-    plt.ylabel('Firing Rate')
+    plt.ylabel('Mean Firing Rate')
     plt.title('Firing Rate over 1000ms (50 Windows)')
+
     plt.show()
 
+if __name__ == "__main__":
+    # Excitatory neurons network
+    Module_ex = Modules(100, 20, "exc", connections_with_in=1000)
+    # Inhibitory neurons network
+    Modules_inhib = Modules(200, 1, "inhib", connections_with_in=39800)
 
+    # Connections within the excitatory network
+    Module_ex.set_Connections_within("constant", (1,), 17)
+    # Connections within the inhibitory network
+    Modules_inhib.set_Connections_within("random", (-1, 0), 1)
 
+    # Initializing a community
+    community = Community()
 
+    # Adding eight excitatory networks to the community
+    for i in range(8):
+        Module_ex = Modules(100, 20, "exc", connections_with_in=1000)
+        Module_ex.set_Connections_within("constant", (1,), 17)
+        community.modules.append(Module_ex)
 
+    # Adding one inhibitory networks to the community
+    community.modules.append(Modules_inhib)
 
+    # Setting excitatory-inhibitory connections
+    community.set_connection_btw_modules("Focal", "random", (0, 1), 50, 1)
+    # Setting inhibitory-excitatory connections
+    community.set_connection_btw_modules("Diffuse", "random", (-1, 0), 2, 1)
 
+    P = [0, 0.1, 0.2, 0.3, 0.4, 0.5]
+    for p in P:
+        simulating(community, p,T=1000)
+    
     breakpoint()
 
 
