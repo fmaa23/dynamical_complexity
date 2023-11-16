@@ -53,4 +53,4 @@ class TestGeneratingNetwork(unittest.TestCase):
 
         self.community.generate_final_network()
 
-        self.community.plot_Weights1()
+        self.community.plot_connections()

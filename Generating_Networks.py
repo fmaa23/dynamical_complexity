@@ -146,6 +146,8 @@ class Community():
         else:
             self.connections = connections
         # final_network = None
+        self.exc_counter = 0
+        self.inb_counter = 0
 
     def set_connection(self,module1, module2, weight_scheme, weight_range, scaling_factor, num_connections_from, delay,
                        connections_to_all = True, start_connections_idx = None, end_connections_idx= None):
@@ -175,7 +177,12 @@ class Community():
 
         # Connecting from selected neuron indices to all neurons in the second module
         if connections_to_all:
-            connected_neurons[indices,:] = True
+            for x in range(0, 25):
+                for y in range(0, 4):
+                    connected_neurons[y + self.exc_counter*4][x + self.inb_counter*25] = True
+                self.exc_counter += 1
+            self.inb_counter += 1
+            print(connected_neurons.shape)
         else:
             connected_neurons[indices, start_connections_idx:end_connections_idx] = True
 
@@ -185,7 +192,7 @@ class Community():
         elif weight_scheme == "random":
             # Size is number of neurons the connection is from to number of neurons the connection is directed to
             if connections_to_all:
-                weight = np.random.uniform(weight_range[0], weight_range[1], size=num_connections_from * module2._N)
+                weight = np.random.uniform(weight_range[0], weight_range[1], size=20000)
             else:
                 weight = np.random.uniform(weight_range[0], weight_range[1], size=num_connections_from * (end_connections_idx-start_connections_idx))
         else:
@@ -369,21 +376,22 @@ class Community():
                 final_d[800:1000] = module.d
         self.final_network.setParameters(a=final_a, b=final_b, c=final_c, d=final_d)
     
-    def plot_Weights1(self):
-        
+    def plot_connections(self):
 
         # Create a mask: 0 where weights are 0, 1 where weights are non-zero
-        mask = np.where(self.final_weights == 0, 0, 1)
+        mask = np.where(self.final_weights == 0, 1, 0)
+
         # Create the plot
-        plt.imshow(mask, cmap='coolwarm', interpolation='nearest')
+        plt.imshow(mask, cmap="gray", interpolation='nearest')
 
         # Optional: Add a color bar
-        plt.colorbar()
+        #plt.colorbar()
+        
 
         # Optional: Add title and labels
-        plt.title('Heatmap of Weights')
-        plt.xlabel('Neuron Index')
-        plt.ylabel('Neuron Index')
+        plt.title('Connection map')
+        plt.xlabel('Source Neuron')
+        plt.ylabel('Target Neuron')
 
         # Show the plot
         plt.show()
@@ -391,7 +399,7 @@ class Community():
 def simulating(Community, p, T=1000):
     Community.make_modular_small_world(p)
     Community.generate_final_network()
-    Community.plot_Weights1()
+    Community.plot_connections()
     
     V = np.zeros((T, community.final_network._N))
     for t in range(T):
