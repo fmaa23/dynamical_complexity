@@ -107,7 +107,7 @@ class Modules(IzNetwork):
         delays = np.zeros((self._N,self._N))
         delays = delays.astype(int)
 
-        random_integers = np.random.randint(1, self._Dmax+1, size=num_connections_with_in)
+        random_integers = np.random.randint(1, self._Dmax, size=num_connections_with_in)
 
         # Updating connected neurons delays
         delays[connected_neurons] += random_integers
@@ -449,7 +449,12 @@ def simulating(Community, p, T=1000):
     for i in range(8):
         firing.append(np.sum(spikes[:, i*100: (i+1)*100], axis=1)/100)
 
-    time_points = np.linspace(0, 1000, len(firing[0]))
+    time_points = []
+    for time in timings:
+        time_point = time[0]+(time[1]-time[0])/2
+        time_points.append(time_point)
+
+
     for i, arr in enumerate(firing):
         plt.subplot(2,1,2)
         plt.plot(time_points, arr)
@@ -488,7 +493,7 @@ if __name__ == "__main__":
     # Setting inhibitory-excitatory connections
     community.set_connection_btw_modules("Diffuse", "random", (-1, 0), 2, 1)
 
-    P = [0, 0.1, 0.2, 0.3, 0.4, 0.5]
+    P = [0]
     for p in P:
         simulating(community, p,T=1000)
     
