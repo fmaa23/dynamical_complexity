@@ -31,7 +31,7 @@ The class represents a connection between modules.
 - _try_rewiring_: deciding whether the rewiring will take place or not based on random probability, if yes then the _rewire_ method will do the rewiring, if not the weight and the delay of the `Connection` will stay the same 
 - _rewire_: rewiring the existing connection by assigning the new destination neuron with random neuron from other modules.
 - _generate_final_network_: combining all connected modules to make one big module that become our final network
-- _plot_Weights1_: plotting the connectivity matrix and the weight of the connections
+- _plot_connections_: plotting the connectivity matrix and the weight of the connections
 
 ### Method
-- `Simulating()`: simulating how the final network works during certain duration 'T' by giving 'p' (rewiring probability). This method will shows the **connectivity matrix** to illustrate the structure of the final networks, the **raster plot** to show which parts of the network fires in certain time, and the **mean firing rate** to show number of spikes of each module within each 50ms windows shifted every 20ms.
+- `Simulating()`: simulating the behaviour of our network during certain duration 'T' by giving 'p' (rewiring probability). This method will shows the **connectivity matrix** to illustrate the structure of the final networks, the **raster plot** to show which parts of the network fires in certain time, and the **mean firing rate** to show number of spikes of each module within each 50ms windows shifted every 20ms.
