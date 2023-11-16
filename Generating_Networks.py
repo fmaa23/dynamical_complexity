@@ -7,14 +7,15 @@ import matplotlib.pyplot as plt
 
 # Generating Modules
 class Modules(IzNetwork):
-    """ Subclass of the Iznetwork class
+    """ 
+    Subclass of the Iznetwork class
 
-        Modules class contains relevant about each module. it contains the type
-        of neurons de module has, number of neurons, and number of connections 
-        with in the module.
+    Modules class contains relevant about each module. it contains the type
+    of neurons de module has, number of neurons, and number of connections 
+    with in the module.
 
-       type_of_network (str): The type of network specified as "inhib" or "exc"
-       connections_with_in (int): The number of connections within the module
+    type_of_network (str): The type of network specified as "inhib" or "exc"
+    connections_with_in (int): The number of connections within the module
     """
     def __init__(self, N, Dmax, type_of_network ="exc", connections_with_in=0):
         super().__init__(N, Dmax)
@@ -27,10 +28,10 @@ class Modules(IzNetwork):
         """
         Set synaptic delays.
 
-        Inputs:
-        D  -- np.array or np.matrix. The delay matrix must contain nonnegative
-              integers, and must be of size N-by-N, where N is the number of
-              neurons supplied in the constructor.
+        Args:
+        D (np.array):   The delay matrix must contain nonnegative
+                        integers, and must be of size N-by-N, where N is the number of
+                        neurons supplied in the constructor.
         """
         if D.shape != (self._N, self._N):
             raise Exception('Delay matrix must be N-by-N.')
@@ -77,17 +78,17 @@ class Modules(IzNetwork):
               self._I[neuron_index] = 0  # No extra current
 
     def set_Connections_within(self, weight_scheme, weight_range, scaling_factor):
-        """" Setting connections within a single module. The weights and delays are updated within the module parameters
-             using update methods of the IzNetwork class. The weights are given by self._W and the delays as self._D
+        """" 
+        Setting connections within a single module. The weights and delays are updated within the module parameters
+        using update methods of the IzNetwork class. The weights are given by self._W and the delays as self._D
 
-             Args:
-                 weight_scheme (str): The weight scheme through which the neurons within the module is connected;
-                                      "constant" or "random"
-                 weight_range (tuple): The range through which the weights are to be taken randomly,
-                                       if constant single number should be given
-                 scaling_factor (int): The scaling factor of the connections between neurons
-
-              """
+        Args:
+            weight_scheme (str):   The weight scheme through which the neurons within the module is connected;
+                                "constant" or "random"
+            weight_range (tuple):  The range through which the weights are to be taken randomly,
+                                if constant single number should be given
+            scaling_factor (int):  The scaling factor of the connections between neurons
+        """
 
         # Connections Array
         connection_size = (self._N,self._N)
@@ -137,11 +138,12 @@ class Modules(IzNetwork):
         self.setDelays(delays)
 
 class Connection():
-    """ The connection class represents a single between-modules connection. The connection attributes include
-        module1(Module): The module from which the connections start
-        module2(Module): The module to which the connections are directed
-        weights(np.array): The weights of the connection
-        delays(np.array): The delays of the connection
+    """ 
+    The connection class represents a single between-modules connection. The connection attributes include
+        module1(Module):    The module from which the connections start
+        module2(Module):    The module to which the connections are directed
+        weights(np.array):  The weights of the connection
+        delays(np.array):   The delays of the connection
     """
     def __init__(self, module1=None, module2=None, weights=None, delays=None):
         self.module1 = module1
@@ -150,13 +152,14 @@ class Connection():
         self.delays = delays
 
 class Community():
-    """ The community class represents a community with modules and the connections between modules.
-        modules(list): List containing all models in the community
-        connections(list): List of all connections between modules
+    """ 
+    The community class represents a community with modules and the connections between modules.
+    modules(list): List containing all models in the community
+    connections(list): List of all connections between modules
 
-        Kindly note that the connections attribute only include between modules connections not within modules.
-        Connections within modules are specified in the module (Module class) attributes via the weights array 
-        module._W and delays array module._D
+    Kindly note that the connections attribute only include between modules connections not within modules.
+    Connections within modules are specified in the module (Module class) attributes via the weights array 
+    module._W and delays array module._D
     """
     def __init__(self, modules=None, connections=None):
         # List of modules present in the community
@@ -174,18 +177,19 @@ class Community():
 
     def set_connection(self,module1, module2, weight_scheme, weight_range, scaling_factor, num_connections_from, delay,
                        connections_to_all = True):
-        """ Sets a connection between two modules.
-            Args:
-               module1 (Module):     The module the connections starts from
-               module2 (Module):     The module the connections ends in
-               weight_scheme (str):  The weight scheme through which the neurons within the module is connected;
-                                      "constant" or "random"
-               weight_range (tuple): The range through which the weights are to be taken randomly,
-                                       if constant single number should be given
-               scaling_factor (int): The scaling factor of the connections between neurons
-               num_connections_from (int): The number of neurons participating in the connection from module 1
-               delay (int): The maximum delay of the connection in milliseconds
-               connections_to_all (bool): Connections to be to all neurons in the second module
+        """ 
+        Sets a connection between two modules.
+        Args:
+            module1 (Module):     The module the connections starts from
+            module2 (Module):     The module the connections ends in
+            weight_scheme (str):  The weight scheme through which the neurons within the module is connected;
+                                    "constant" or "random"
+            weight_range (tuple): The range through which the weights are to be taken randomly,
+                                    if constant single number should be given
+            scaling_factor (int): The scaling factor of the connections between neurons
+            num_connections_from (int): The number of neurons participating in the connection from module 1
+            delay (int): The maximum delay of the connection in milliseconds
+            connections_to_all (bool): Connections to be to all neurons in the second module
         """
 
         # Connections Array
@@ -251,16 +255,17 @@ class Community():
         self.connections.append(connection)
 
     def set_connection_btw_modules(self, projection_pattern, weight_scheme, weight_range, scaling_factor, delay):
-        """Sets the connection between modules as specified by the project specs.
-            Args:
-                projection_pattern (str): "Focal" from specific number of neurons in module 1 to all neurons in module 2
+        """
+        Sets the connection between modules as specified by the project specs.
+        Args:
+            projection_pattern (str):   "Focal" from specific number of neurons in module 1 to all neurons in module 2
                                         "Diffuse" all to all connection from module 1 to module 2
-                weight_scheme (str): The weight scheme through which the neurons within the module is connected;
-                                    "constant" or "random"
-                weight_range (tuple): The range through which the weights are to be taken randomly,
-                                    if constant single number should be given
-                scaling_factor (int): The scaling factor of the connections between neurons
-                delay (int): The maximum delay of the connection in milliseconds
+            weight_scheme (str):        The weight scheme through which the neurons within the module is connected;
+                                        "constant" or "random"
+            weight_range (tuple):       The range through which the weights are to be taken randomly,
+                                        if constant single number should be given
+            scaling_factor (int):       The scaling factor of the connections between neurons
+            delay (int):                The maximum delay of the connection in milliseconds
         """
 
         # Getting excitatory modules in the community
@@ -296,13 +301,14 @@ class Community():
             raise ValueError('Projection scheme invalid. Should be "Focal" or "Diffuse"')  
 
     def make_modular_small_world(self, p=0.4):
-        """ Make the rewring for modular small world
+        """ 
+        Make the rewring for modular small world
 
-            Saves the resulted rewiring in self.rewired_W and self,rewired_D for latter use
-            in the code.
+        Saves the resulted rewiring in self.rewired_W and self,rewired_D for latter use
+        in the code.
 
-            Args:
-                p (float): The rewiring probability 'p'
+        Args:
+            p (float): The rewiring probability 'p'
         """
         exc_modules = []
 
@@ -321,13 +327,14 @@ class Community():
                         self.try_rewiring(p, module, source_module, i, j)
 
     def try_rewiring(self, p, module, source_module, i, j):
-        """ Contains the logic behind rewiring 
-            Args:
-                p (float): The rewiring probability 'p'
-                module (Modules): The module we are doing the rewiring in
-                source_module (int): Number of the origin module, from 0 to 7
-                i (int): Index of the source neuron
-                j (int): Index of the target neuron
+        """
+        Contains the logic behind rewiring 
+        Args:
+            p (float):           The rewiring probability 'p'
+            module (Modules):    The module we are doing the rewiring in
+            source_module (int): Number of the origin module, from 0 to 7
+            i (int):             Index of the source neuron
+            j (int):             Index of the target neuron
         """
         rewire_p = random.random()
         if rewire_p <= p:
@@ -339,13 +346,14 @@ class Community():
             self.rewired_D[source_module*100 + i][source_module*100 + j] = module._D[i][j]
 
     def rewire(self, module, source_module, i, j):
-        """ Rewire the connection
+        """ 
+        Rewire the connection
         
-            Args:
-                module (Modules): The module we are doing the rewiring from
-                source_module (int): Number of the origin module, from 0 to 7
-                i (int): Index of the source neuron
-                j (int): Index of the target neuron
+        Args:
+            module (Modules):    The module we are doing the rewiring from
+            source_module (int): Number of the origin module, from 0 to 7
+            i (int):             Index of the source neuron
+            j (int):             Index of the target neuron
         """
         rewired = False
         while not rewired:
@@ -367,12 +375,11 @@ class Community():
                 rewired = True
 
     def generate_final_network(self):
-
         """ Builts an iznetwork with the information of the community """
         self.final_network = Modules(1000, 20)
 
         # set weights adn delays in the final network
-        #Initialize weights and delays:
+        # Initialize weights and delays:
         final_weights = np.zeros((1000, 1000))
         final_delays = np.zeros((1000, 1000), dtype=int)
         # add rewired to final:
@@ -446,9 +453,19 @@ class Community():
         plt.show()
     
 def simulating(Community, p, T=1000):
-    """ Generate a simulation"""
+    """ 
+    Generate the connectivity matrix, raster plot, and the mean firing rate 
+    that describe the behaviour of the modular network when simulated during 
+    T (duration). 
+
+    Args:
+        Community (Community):  The modular network that we want to simulate 
+        p (float):              The rewiring probability of the modular network we want to simulate
+        T (int):                The duration of the simulation
+    """
     Community.make_modular_small_world(p)
     Community.generate_final_network()
+    # Plot the connectivity matrix
     Community.plot_connections()
 
 
@@ -471,15 +488,15 @@ def simulating(Community, p, T=1000):
     firing_instances, fired_neurons = np.where(firing_times > 29)
 
     plt.figure(figsize=(10,8))
-    plt.subplots_adjust(hspace=0.3, wspace=0.4)
+    plt.subplots_adjust(hspace=0.4, wspace=0.4)
 
+    # Plot the raster plot
     plt.subplot(2,1,1)
     plt.scatter(firing_instances, fired_neurons)
     plt.xlabel('Time (ms)')
     plt.ylabel('Neuron index')
     plt.title('Firing Neurons when p={}'.format(p))
     plt.xlim(0, T)
-
 
 
     window_size = 50
@@ -493,8 +510,6 @@ def simulating(Community, p, T=1000):
         time_indices = np.where(fired_neurons == j)
         timings=[]
         padding = window_size - shift
-
-
 
         # Adjust the range to include padding at the start
         for i, t in enumerate(range(-padding, T - window_size + 1, shift)):
@@ -517,7 +532,7 @@ def simulating(Community, p, T=1000):
         for k, times in enumerate(timings):
             spikes_windowed[k,j] = np.sum(firing[j][times[0]:times[1]])/50
 
-
+    # Plot the mean firing plot
     time_points=[]
     for time in timings:
         time_point = time[0]+(time[1]-time[0])/2
