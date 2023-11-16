@@ -9,14 +9,14 @@ Done by: Carlos Villalobos Sanchez, Fatima M S Al-ani, Gita A Salsabila
 ## Running the code
 1. To run the code, use the following command within current directory: `python3 main.py`
 
-## Classes & 
-- Modules (class)
-The class used for constructing each modules within the modular network
-    - set_network_pars: method for setting the neurons parameters (a,b,c,d) within a single module
+## Program Structure 
+### Classes
+- *Modules* (class): The class used for constructing each modules within the modular network
+    - _set_network_pars_: method for setting the neurons parameters (a,b,c,d) within a single module
     - setCurrentWithBackgroundFiring: method for setting the background firing for random neurons within a single module 
     - set_Connections_within: method for setting connection between neurons within a single module
 
-- Connection (class)
+- Connection (class):
 
 - Community (class)
     methods:
@@ -28,4 +28,5 @@ The class used for constructing each modules within the modular network
     - generate_final_network
     - plot_Weights1
 
+### Method
 - Simulating (method)
