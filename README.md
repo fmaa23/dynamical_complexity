@@ -11,7 +11,8 @@ Done by: Carlos Villalobos Sanchez, Fatima M S Al-ani, Gita A Salsabila
 
 ## Program Structure 
 ### Classes
-- `Module` : The class used for constructing each modules within the modular network. 
+- `Module` : The class used for constructing each modules within the modular network by inheriting the `iznetwork` class. 
+
 Methods:
     - _set_network_pars_: setting the neurons parameters (a,b,c,d) within a single module
     - _setCurrentWithBackgroundFiring_: setting the background firing for random neurons within a single module 
@@ -19,10 +20,19 @@ Methods:
 
 - `Connection`: The class represents a connection between modules.
 
+Attributes:
+    - module1
+    - module2
+    - weight
+    - delay 
+
 - `Community`
+
+Attributes:
+
 Methods:
     - _set_connection_: setting `Connection` class between modules by 
-    - _set_connection_btw_modules_: setting 
+    - _set_connection_btw_modules_: setting  
     - _make_modular_small_world_:
     - _try_rewiring_:
     - _rewire_: 
@@ -30,4 +40,4 @@ Methods:
     - _plot_Weights1_: plotting the connectivity matrix and the weight of the connections
 
 ### Method
-- **Simulating**: 
+- `Simulating()`: 
