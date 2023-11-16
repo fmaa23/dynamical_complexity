@@ -11,22 +11,23 @@ Done by: Carlos Villalobos Sanchez, Fatima M S Al-ani, Gita A Salsabila
 
 ## Program Structure 
 ### Classes
-- *Modules* (class): The class used for constructing each modules within the modular network
-    - _set_network_pars_: method for setting the neurons parameters (a,b,c,d) within a single module
-    - setCurrentWithBackgroundFiring: method for setting the background firing for random neurons within a single module 
-    - set_Connections_within: method for setting connection between neurons within a single module
+- `Module` : The class used for constructing each modules within the modular network. 
+Methods:
+    - _set_network_pars_: setting the neurons parameters (a,b,c,d) within a single module
+    - _setCurrentWithBackgroundFiring_: setting the background firing for random neurons within a single module 
+    - _set_Connections_within_: setting connection between neurons within a single module
 
-- Connection (class):
+- `Connection`: The class represents a connection between modules.
 
-- Community (class)
-    methods:
-    - set_connection
-    - set_connection_btw_modules
-    - make_modular_small_world
-    - try_rewiring
-    - rewire
-    - generate_final_network
-    - plot_Weights1
+- `Community`
+Methods:
+    - _set_connection_: setting `Connection` class between modules by 
+    - _set_connection_btw_modules_: setting 
+    - _make_modular_small_world_:
+    - _try_rewiring_:
+    - _rewire_: 
+    - _generate_final_network_: combining all the modules 
+    - _plot_Weights1_: plotting the connectivity matrix and the weight of the connections
 
 ### Method
-- Simulating (method)
+- **Simulating**: 
