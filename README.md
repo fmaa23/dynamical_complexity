@@ -7,7 +7,8 @@ Done by: Carlos Villalobos Sanchez, Fatima M S Al-ani, Gita A Salsabila
 - [main.py](./main.py): the main program simulating how modular network works  
 
 ## Running the code
-1. To run the code, use the following command within current directory: `python3 main.py`
+1. To run the code, use the following command within current directory: `python3 main.py`. The program will create a modular network based on the defined parameters and call the `Simulating()` function to show the behaviour of the network by the connectivity matrix, the raster plot, and the mean firing rate based on given T (duration) and p (rewiring probability). 
+
 
 ## Program Structure 
 ### Classes
@@ -26,7 +27,7 @@ The class represents a connection between modules.
 #### `Community`
 **Methods**:
 - _set_connection_: setting `Connection` class between modules by setting the weight and the delay of the connection
-- _set_connection_btw_modules_: setting the connection between each type of modules based on 
+- _set_connection_btw_modules_: setting the connection between each type of modules based on the projection pattern (focal for excitatory-inhibitory, diffuse for inhibitory-exitatory and inhibitory-inhibitory). 
 - _make_modular_small_world_: creating the small world network of by rewiring connections between exitatory modules using _try_rewiring_ method
 - _try_rewiring_: deciding whether the rewiring will take place or not based on random probability, if yes then the _rewire_ method will do the rewiring, if not the weight and the delay of the `Connection` will stay the same 
 - _rewire_: rewiring the existing connection by assigning the new destination neuron with random neuron from other modules.
