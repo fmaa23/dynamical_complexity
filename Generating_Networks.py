@@ -450,7 +450,14 @@ def simulating(Community, p, T=1000):
     Community.make_modular_small_world(p)
     Community.generate_final_network()
     Community.plot_connections()
-    
+
+
+    # Transient simulation for 100 ms
+    for t in range(100):
+        community.final_network.setCurrentWithBackgroundFiring()
+        community.final_network.update()
+
+    # Recording simulation for duration T
     V = np.zeros((T, community.final_network._N))
     for t in range(T):
         community.final_network.setCurrentWithBackgroundFiring()
@@ -473,7 +480,9 @@ def simulating(Community, p, T=1000):
     plt.title('Firing Neurons when p={}'.format(p))
     plt.xlim(0, T)
 
-    window_size=50
+
+
+    window_size = 50
     shift = 20
     spikes = np.zeros((T,800))
     spikes_windowed = np.zeros((50,8))
@@ -487,7 +496,7 @@ def simulating(Community, p, T=1000):
 
 
 
-            # Adjust the range to include padding at the start
+        # Adjust the range to include padding at the start
         for i, t in enumerate(range(-padding, T - window_size + 1, shift)):
             start_time = max(0, t)  # Ensure the start time doesn't go below 0
             end_time = min(t + window_size, T)  # Ensure the end time doesn't exceed T
@@ -509,14 +518,10 @@ def simulating(Community, p, T=1000):
             spikes_windowed[k,j] = np.sum(firing[j][times[0]:times[1]])/50
 
 
-
     time_points=[]
     for time in timings:
         time_point = time[0]+(time[1]-time[0])/2
         time_points.append(time_point)
-
-
-
 
     for i in range(8):
         plt.subplot(2,1,2)
@@ -529,14 +534,11 @@ def simulating(Community, p, T=1000):
 
     plt.show()
 
-if __name__ == "__main__":
-    # Excitatory neurons network
-    Module_ex = Modules(100, 20, "exc", connections_with_in=1000)
+def sample_community():
+
     # Inhibitory neurons network
     Modules_inhib = Modules(200, 1, "inhib", connections_with_in=39800)
 
-    # Connections within the excitatory network
-    Module_ex.set_Connections_within("constant", (1,), 17)
     # Connections within the inhibitory network
     Modules_inhib.set_Connections_within("random", (-1, 0), 1)
 
@@ -557,11 +559,16 @@ if __name__ == "__main__":
     # Setting inhibitory-excitatory connections
     community.set_connection_btw_modules("Diffuse", "random", (-1, 0), 2, 1)
 
-    P = [0.2]
+    return community
+
+if __name__ == "__main__":
+
+    P = [0,0.1, 0.2, 0.3, 0.4, 0.5]
     for p in P:
+        community = sample_community()
         simulating(community, p,T=1000)
 
-    breakpoint()
+
 
 
 
