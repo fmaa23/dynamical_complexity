@@ -18,6 +18,24 @@ class Modules(IzNetwork):
         self._N
         self.set_network_pars()
 
+    def setDelays(self, D):
+        """
+        Set synaptic delays.
+
+        Inputs:
+        D  -- np.array or np.matrix. The delay matrix must contain nonnegative
+              integers, and must be of size N-by-N, where N is the number of
+              neurons supplied in the constructor.
+        """
+        if D.shape != (self._N, self._N):
+            raise Exception('Delay matrix must be N-by-N.')
+
+        if not np.issubdtype(D.dtype, np.integer):
+            raise Exception('Delays must be integer numbers.')
+
+        self._D = D
+
+
     def set_network_pars(self):
 
         a_n, b_n, c_n, d_n =[], [], [], []
@@ -27,7 +45,7 @@ class Modules(IzNetwork):
             if self.type_of_network == "exc":
                 a, b, c, d = 0.02, 0.2, (-65 + 15 * r ** 2), (8 - 6 * r ** 2)
             elif self.type_of_network == "inhib":
-                a, b, c, d = (0.02 + 0.08 * r), (0.25 - 0.05 * r), -50, 2
+                a, b, c, d = (0.02 + 0.08 * r), (0.25 - 0.05 * r), -65, 2
             else:
                 raise ValueError('Network type invalid. Should be "inhib" or "exc"')
             a_n.append(a)
@@ -313,7 +331,7 @@ class Community():
                 rewired = True
 
     def generate_final_network(self):
-        self.final_network = IzNetwork(1000, 20)
+        self.final_network = Modules(1000, 20)
 
         # set weights adn delays in the final network
         #Initialize weights and delays:
@@ -339,10 +357,7 @@ class Community():
         # add inhibitory to inhibitory
         for module in self.modules:
             if module.type_of_network == "inhib":
-                #print(np.copy(module._W).shape)
-                #print(final_weights[800:1000, 800:1000].shape)
                 final_weights[800:1000, 800:1000] = np.copy(module._W)
-                print(final_weights[800:1000, 800:1000])
                 final_delays[800:1000, 800:1000] = module._D
         self.final_network.setWeights(final_weights)
         self.final_network.setDelays(final_delays)
@@ -368,6 +383,8 @@ class Community():
                 final_c[800:1000] = module.c
                 final_d[800:1000] = module.d
         self.final_network.setParameters(a=final_a, b=final_b, c=final_c, d=final_d)
+
+
     
     def plot_connections(self):
 
@@ -414,17 +431,21 @@ def simulating(Community, p, T=1000):
     plt.xlabel('Time (ms)')
     plt.ylabel('Neuron index')
     plt.title('Firing Neurons when p={}'.format(p))
+    plt.xlim(0, T)
 
     window_size=50
     shift = 20
-    spikes = np.zeros((50,800))
+    spikes = np.zeros((T,800))
+    spikes_windowed = np.zeros((50,8))
     num_windows = T//window_size
 
     for j in range(800):
         tuple_array = np.array(list(zip(firing_instances, fired_neurons)))
-        time_indices = np.where(fired_neurons==j)
+        time_indices = np.where(fired_neurons == j)
         timings=[]
         padding = window_size - shift
+
+
 
             # Adjust the range to include padding at the start
         for i, t in enumerate(range(-padding, T - window_size + 1, shift)):
@@ -433,28 +454,38 @@ def simulating(Community, p, T=1000):
             timings.append((start_time, end_time))
 
         times_of_this_neuron_firing = firing_instances[np.where(fired_neurons == j)]
-        for k,times in enumerate(timings):
+        for k,times in enumerate(range(T)):
             for time_of_this_neuron_firing in times_of_this_neuron_firing:
-                if time_of_this_neuron_firing in range(times[0],times[1]+1):
+                if time_of_this_neuron_firing == k:
                     spikes[k,j] = spikes[k,j]+1
+
 
     firing=[]
     for i in range(8):
-        firing.append(np.sum(spikes[:, i*100: (i+1)*100], axis=1)/100)
+        firing.append(np.sum(spikes[:, i*100: (i+1)*100], axis=1))
 
-    time_points = []
+    for j in range(8):
+        for k, times in enumerate(timings):
+            spikes_windowed[k,j] = np.sum(firing[j][times[0]:times[1]])/50
+
+
+
+    time_points=[]
     for time in timings:
         time_point = time[0]+(time[1]-time[0])/2
         time_points.append(time_point)
 
 
-    for i, arr in enumerate(firing):
+
+
+    for i in range(8):
         plt.subplot(2,1,2)
-        plt.plot(time_points, arr)
+        plt.plot(time_points, spikes_windowed[:,i])
 
     plt.xlabel('Time (ms)')
     plt.ylabel('Mean Firing Rate')
     plt.title('Firing Rate over 1000ms (50 Windows)')
+    plt.xlim(0,T)
 
     plt.show()
 
@@ -486,9 +517,11 @@ if __name__ == "__main__":
     # Setting inhibitory-excitatory connections
     community.set_connection_btw_modules("Diffuse", "random", (-1, 0), 2, 1)
 
-    P = [0, 0.1, 0.2, 0.3]
+    P = [0.2]
     for p in P:
         simulating(community, p,T=1000)
+
+    breakpoint()
 
 
 
