@@ -150,7 +150,7 @@ class Community():
         self.inb_counter = 0
 
     def set_connection(self,module1, module2, weight_scheme, weight_range, scaling_factor, num_connections_from, delay,
-                       connections_to_all = True, start_connections_idx = None, end_connections_idx= None):
+                       connections_to_all = True):
         """Sets a connection between two modules.
            Args:
                module1 (Module):     The module the connections starts from
@@ -163,9 +163,6 @@ class Community():
                num_connections_from (int): The number of neurons participating in the connection from module 1
                delay (int): The maximum delay of the connection in milliseconds
                connections_to_all (bool): Connections to be to all neurons in the second module
-               start_connections_idx (int): If connections_random is False, specify start connection index
-               end_connections_idx (int): If connections_random is False, specify end connection index
-
         """
 
         # Connections Array
@@ -256,12 +253,8 @@ class Community():
 
             for i, module_ex in enumerate(modules_ex):
                 num_connections_from = 4
-
-                start_edges_ind = i*25
-                end_edges_ind = (i+1) * 25
                 self.set_connection(module_ex, module_inhib, weight_scheme, weight_range, scaling_factor,
-                                    num_connections_from, delay, connections_to_all=False,
-                                    start_connections_idx=start_edges_ind, end_connections_idx=end_edges_ind)
+                                    num_connections_from, delay, connections_to_all=False)
 
             # Setting the connection
 
