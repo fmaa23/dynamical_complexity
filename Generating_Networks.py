@@ -177,15 +177,15 @@ class Community():
 
         # Connecting from selected neuron indices to all neurons in the second module
         if connections_to_all:
+            connected_neurons[indices, :] = True
+        else:
+            exc_counter = 0
+            inb_counter = 0
             for x in range(0, 25):
                 for y in range(0, 4):
-                    connected_neurons[y + self.exc_counter*4][x + self.inb_counter*25] = True
-                self.exc_counter += 1
+                    connected_neurons[y + exc_counter*4][x + self.inb_counter*25] = True
+                exc_counter += 1
             self.inb_counter += 1
-            print(connected_neurons.shape)
-        else:
-            connected_neurons[indices, start_connections_idx:end_connections_idx] = True
-
         # Getting weights based on the specified weighting scheme
         if weight_scheme == "constant":
             weight = weight_range[0]
@@ -194,7 +194,7 @@ class Community():
             if connections_to_all:
                 weight = np.random.uniform(weight_range[0], weight_range[1], size=20000)
             else:
-                weight = np.random.uniform(weight_range[0], weight_range[1], size=num_connections_from * (end_connections_idx-start_connections_idx))
+                weight = np.random.uniform(weight_range[0], weight_range[1], size=100)
         else:
             raise ValueError('Scheme invalid. Should be "constant" or "random"')
 
@@ -219,7 +219,7 @@ class Community():
         if connections_to_all:
             random_integers = np.random.randint(1, delay+1, size=num_connections_from*module2._N)
         else:
-            random_integers = np.random.randint(1, delay + 1, size= num_connections_from * (end_connections_idx-start_connections_idx))
+            random_integers = np.random.randint(1, delay + 1, size= 100)
         delays[connected_neurons] += random_integers
 
         # Specifying the connection delays
@@ -493,11 +493,9 @@ if __name__ == "__main__":
     # Setting inhibitory-excitatory connections
     community.set_connection_btw_modules("Diffuse", "random", (-1, 0), 2, 1)
 
-    P = [0]
+    P = [0, 0.1, 0.2, 0.3]
     for p in P:
         simulating(community, p,T=1000)
-    
-    breakpoint()
 
 
 
