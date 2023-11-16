@@ -26,11 +26,11 @@ The class represents a connection between modules.
 #### `Community`
 **Methods**:
 - _set_connection_: setting `Connection` class between modules by setting the weight and the delay of the connection
-- _set_connection_btw_modules_: setting the  
-- _make_modular_small_world_: connectimg 
-- _try_rewiring_: 
-- _rewire_: rewiring the existing connection by changing the 
-- _generate_final_network_: combining all connected the modules to make one big module that become the final network
+- _set_connection_btw_modules_: setting the connection between each type of modules based on 
+- _make_modular_small_world_: creating the small world network of by rewiring connections between exitatory modules using _try_rewiring_ method
+- _try_rewiring_: deciding whether the rewiring will take place or not based on random probability, if yes then the _rewire_ method will do the rewiring, if not the weight and the delay of the `Connection` will stay the same 
+- _rewire_: rewiring the existing connection by assigning the new destination neuron with random neuron from other modules.
+- _generate_final_network_: combining all connected modules to make one big module that become our final network
 - _plot_Weights1_: plotting the connectivity matrix and the weight of the connections
 
 ### Method
