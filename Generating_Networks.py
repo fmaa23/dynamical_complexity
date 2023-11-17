@@ -611,7 +611,7 @@ def sample_community():
 
 if __name__ == "__main__":
 
-    P = [0.5]
+    P = [0, 0.1, 0.2, 0.3, 0.4, 0.5]
     for p in P:
         # Generate a community
         community = sample_community()
