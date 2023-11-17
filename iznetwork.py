@@ -60,14 +60,12 @@ class IzNetwork(object):
     self._dt     = 0.1
     self.v       = -65.0*np.ones(N)
     self.u       = -1.0*np.ones(N)
-    self._D = np.zeros((self._N,self._N))
-    self._W = np.zeros((self._N,self._N))
 
 
   def setDelays(self, D):
     """
     Set synaptic delays.
-    
+
     Inputs:
     D  -- np.array or np.matrix. The delay matrix must contain nonnegative
           integers, and must be of size N-by-N, where N is the number of
@@ -79,7 +77,7 @@ class IzNetwork(object):
     if not np.issubdtype(D.dtype, np.integer):
       raise Exception('Delays must be integer numbers.')
 
-    if (D < 0).any():
+    if (D < 0.5).any():
       raise Exception('Delays must be strictly positive.')
 
     self._D = D
@@ -111,20 +109,6 @@ class IzNetwork(object):
       raise Exception('Current vector must be of size N.')
     self._I = I
 
-  def setCurrentWithBackgroundFiring(self):
-      """
-      Set the current input to the network with background firing.
-      Ensure that the process occurs every 1 ms.
-      """
-      # Generate Poisson-distributed random numbers with λ = 0.01 for each neuron
-      poisson_values = np.random.poisson(0.01, self._N)
-
-      # Check if the Poisson values are greater than 0 and inject extra current (I = 15)
-      for neuron_index, poisson_value in enumerate(poisson_values):
-          if poisson_value > 0:
-              self._I[neuron_index] = 15  # Inject extra current for spontaneous firing
-          else:
-              self._I[neuron_index] = 0  # No extra current
 
   def setParameters(self, a, b, c, d):
     """
